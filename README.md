@@ -14,7 +14,7 @@
 **Advanced Reconnaissance Automation Framework**  
 *Product of Kernelpanic under infosbios.tech*
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/kernelpanic/reconxploit)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/cyb3r-al3rt/ReconXploit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Kali%20Linux-red.svg)](https://www.kali.org/)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](docker/)
@@ -80,7 +80,7 @@ ReconXploit v3.0 is the most advanced reconnaissance automation framework ever b
 ```bash
 # Clone the repository
 git clone https://github.com/cyb3r-al3rt/ReconXploit.git
-cd reconxploit
+cd ReconXploit
 
 # Run the automated installer
 chmod +x scripts/install.sh

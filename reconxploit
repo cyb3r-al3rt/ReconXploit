@@ -1,0 +1,33 @@
+#!/bin/bash
+# ReconXploit v3.0 - Fixed Local Launcher
+# Product of Kernelpanic under infosbios.tech
+
+set -e
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Check virtual environment
+if [[ ! -f "venv/bin/activate" ]]; then
+    echo "\033[0;31m[ERROR]\033[0m Python virtual environment not found!"
+    echo "\033[0;33m[FIX]\033[0m Run: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
+    exit 1
+fi
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Set environment variables
+export PATH="$PATH:$HOME/go/bin"
+export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
+export RECONXPLOIT_HOME="$SCRIPT_DIR"
+
+# Check core module exists
+if [[ ! -f "core/reconxploit.py" ]]; then
+    echo "\033[0;31m[ERROR]\033[0m ReconXploit core module not found!"
+    exit 1
+fi
+
+# Run ReconXploit
+python3 core/reconxploit.py "$@"

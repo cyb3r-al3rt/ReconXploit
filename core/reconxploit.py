@@ -3,9 +3,6 @@
 ReconXploit v3.0 - Advanced Reconnaissance Automation Framework
 Product of Kernelpanic under infosbios.tech
 Author: Muhammad Ismaeel Shareef S S (cyb3r-ssrf)
-
-A comprehensive reconnaissance framework integrating 100+ security tools
-with intelligent workflow management and Mr. Robot themed interface.
 """
 
 import os
@@ -16,13 +13,28 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# Import core modules
-from core.banner_system import BannerSystem
-from core.workflow_engine import WorkflowEngine
-from core.config_manager import ConfigManager
-from core.tool_manager import ToolManager
-from core.result_processor import ResultProcessor
-from core.report_generator import ReportGenerator
+# Fix Python path and imports
+current_dir = Path(__file__).parent.parent.resolve()
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+# Set PYTHONPATH environment variable
+os.environ['PYTHONPATH'] = str(current_dir) + ':' + os.environ.get('PYTHONPATH', '')
+
+# Import with error handling
+try:
+    from core.banner_system import BannerSystem
+    from core.workflow_engine import WorkflowEngine
+    from core.tool_manager import ToolManager
+    from core.result_processor import ResultProcessor
+    from core.report_generator import ReportGenerator
+    from core.config_manager import ConfigManager
+except ImportError as e:
+    print(f"\033[0;31m[ERROR]\033[0m Failed to import ReconXploit modules: {e}")
+    print(f"\033[0;33m[INFO]\033[0m Current directory: {current_dir}")
+    print(f"\033[0;33m[INFO]\033[0m Python path: {sys.path}")
+    print(f"\033[0;33m[FIX]\033[0m Please run from ReconXploit directory or check installation")
+    sys.exit(1)
 
 class ReconXploit:
     """Main ReconXploit framework class"""
@@ -30,25 +42,27 @@ class ReconXploit:
     def __init__(self):
         self.version = "3.0.0"
         self.banner_system = BannerSystem()
-        self.config_manager = ConfigManager()
         self.tool_manager = ToolManager()
         self.workflow_engine = WorkflowEngine()
         self.result_processor = ResultProcessor()
         self.report_generator = ReportGenerator()
+        self.config_manager = ConfigManager()
 
         # Setup logging
         self.setup_logging()
 
     def setup_logging(self):
         """Setup logging configuration"""
-        log_dir = Path("logs")
+        log_dir = current_dir / "logs"
         log_dir.mkdir(exist_ok=True)
+
+        log_file = log_dir / f"reconxploit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler(f"logs/reconxploit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+                logging.FileHandler(log_file),
                 logging.StreamHandler()
             ]
         )
@@ -68,16 +82,13 @@ Examples:
   reconxploit -d example.com                    # Basic reconnaissance
   reconxploit -d example.com --full            # Full comprehensive scan
   reconxploit -d example.com --passive         # Passive reconnaissance only
-  reconxploit -d example.com --output json     # JSON output format
-  reconxploit --wordlist-sync                  # Sync wordlists
-  reconxploit --setup-keys                     # Setup API keys
+  reconxploit --check-tools                    # Check tool installation
             """
         )
 
         # Target specification
         parser.add_argument('-d', '--domain', type=str, help='Target domain for reconnaissance')
         parser.add_argument('-l', '--list', type=str, help='File containing list of domains')
-        parser.add_argument('--scope', type=str, help='Scope file for bug bounty programs')
 
         # Scan types
         parser.add_argument('--passive', action='store_true', help='Passive reconnaissance only')
@@ -92,8 +103,6 @@ Examples:
                            help='Output directory')
 
         # Configuration
-        parser.add_argument('--config', type=str, default='config/config.yaml',
-                           help='Configuration file path')
         parser.add_argument('--threads', type=int, default=50, 
                            help='Number of threads for parallel processing')
         parser.add_argument('--timeout', type=int, default=30,
@@ -108,8 +117,6 @@ Examples:
                            help='Skip vulnerability scanning')
 
         # Utilities
-        parser.add_argument('--wordlist-sync', action='store_true',
-                           help='Sync wordlists from external sources')
         parser.add_argument('--setup-keys', action='store_true',
                            help='Setup API keys interactively')
         parser.add_argument('--check-tools', action='store_true',
@@ -129,10 +136,8 @@ Examples:
         try:
             self.logger.info(f"Starting reconnaissance for: {args.domain}")
 
-            # Load configuration
-            config = self.config_manager.load_config(args.config)
-
-            # Initialize workflow
+            # Create workflow configuration
+            config = {}
             workflow = self.workflow_engine.create_workflow(args, config)
 
             # Execute workflow
@@ -155,25 +160,49 @@ Examples:
 
     async def setup_api_keys(self):
         """Interactive API key setup"""
-        from scripts.setup_api_keys import setup_keys_interactive
-        await setup_keys_interactive()
-
-    async def sync_wordlists(self):
-        """Sync wordlists from external sources"""
-        self.logger.info("Starting wordlist synchronization...")
-        # Implementation for wordlist sync
-        pass
+        try:
+            api_setup_path = current_dir / "scripts/setup_api_keys.py"
+            if api_setup_path.exists():
+                os.system(f"python3 {api_setup_path}")
+            else:
+                print("\033[0;33m[WARNING]\033[0m API setup script not found.")
+        except Exception as e:
+            print(f"\033[0;31m[ERROR]\033[0m Error setting up API keys: {e}")
 
     async def check_tools(self):
         """Check tool installation status"""
         self.logger.info("Checking tool installation status...")
         status = self.tool_manager.check_all_tools()
 
+        print("\n" + "="*60)
+        print("\033[0;36mReconXploit v3.0 - Tool Installation Status\033[0m")
+        print("="*60)
+
+        total_available = 0
+        total_tools = 0
+
         for category, tools in status.items():
-            print(f"\n[{category.upper()}]")
+            print(f"\n\033[1;34m[{category.upper().replace('_', ' ')}]\033[0m")
             for tool, installed in tools.items():
-                status_icon = "✓" if installed else "✗"
-                print(f"  {status_icon} {tool}")
+                status_icon = "\033[0;32m✅\033[0m" if installed else "\033[0;31m❌\033[0m"
+                status_text = "\033[0;32mAvailable\033[0m" if installed else "\033[0;31mMissing\033[0m"
+                print(f"  {status_icon} {tool:<20} - {status_text}")
+                total_tools += 1
+                if installed:
+                    total_available += 1
+
+        # Summary
+        success_rate = (total_available / total_tools * 100) if total_tools > 0 else 0
+        print(f"\n{'='*60}")
+        print(f"\033[1;36mSummary: {total_available}/{total_tools} tools available ({success_rate:.1f}%)\033[0m")
+
+        if total_available < total_tools:
+            print("\n\033[0;33m🔧 To install missing tools:\033[0m")
+            print("   sudo apt install -y libpcap-dev")
+            print("   go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest")
+            print("   go install github.com/hahwul/dalfox/v2@latest")
+            print("   wget https://github.com/epi052/feroxbuster/releases/latest/download/feroxbuster-linux-x86_64.tar.gz")
+            print("   tar -xzf feroxbuster-linux-x86_64.tar.gz && sudo mv feroxbuster /usr/local/bin/")
 
     async def main(self):
         """Main entry point"""
@@ -187,33 +216,33 @@ Examples:
             await self.setup_api_keys()
             return
 
-        if args.wordlist_sync:
-            await self.sync_wordlists()
-            return
-
         if args.check_tools:
             await self.check_tools()
             return
 
         # Validate target
         if not args.domain and not args.list:
-            print("\n[ERROR] Please specify a target domain (-d) or domain list (-l)")
+            print("\n\033[0;31m❌ [ERROR]\033[0m Please specify a target domain (-d) or domain list (-l)")
+            print("\nExamples:")
+            print("  reconxploit -d example.com")
+            print("  reconxploit -l domains.txt") 
+            print("  reconxploit --help")
             return
 
         # Run reconnaissance
         results = await self.run_reconnaissance(args)
 
         if results:
-            print(f"\n[SUCCESS] Reconnaissance completed. Results saved to: {args.output_dir}")
+            print(f"\n\033[0;32m✅ [SUCCESS]\033[0m Reconnaissance completed. Results saved to: {args.output_dir}")
         else:
-            print("\n[ERROR] Reconnaissance failed. Check logs for details.")
+            print("\n\033[0;31m❌ [ERROR]\033[0m Reconnaissance failed. Check logs for details.")
 
 if __name__ == "__main__":
     try:
         reconxploit = ReconXploit()
         asyncio.run(reconxploit.main())
     except KeyboardInterrupt:
-        print("\n[INFO] Reconnaissance interrupted by user")
+        print("\n\n\033[0;33m⚡ [INFO]\033[0m Reconnaissance interrupted by user")
     except Exception as e:
-        print(f"\n[FATAL] {str(e)}")
+        print(f"\n\033[0;31m💥 [FATAL]\033[0m {str(e)}")
         sys.exit(1)

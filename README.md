@@ -79,7 +79,7 @@ ReconXploit v3.0 is the most advanced reconnaissance automation framework ever b
 
 ```bash
 # Clone the repository
-git clone https://github.com/kernelpanic/reconxploit.git
+git clone https://github.com/cyb3r-al3rt/ReconXploit.git
 cd reconxploit
 
 # Run the automated installer
@@ -100,8 +100,8 @@ python3 scripts/setup_api_keys.py
 docker-compose up -d reconxploit
 
 # Or build and run manually
-docker build -t kernelpanic/reconxploit:3.0.0 .
-docker run -v $(pwd)/results:/opt/reconxploit/results kernelpanic/reconxploit:3.0.0 -d example.com
+docker build -t cyb3r-al3rt/reconxploit:3.0.0 .
+docker run -v $(pwd)/results:/opt/reconxploit/results cyb3r-al3rt/reconxploit:3.0.0 -d example.com
 ```
 
 ## 🚀 Quick Start

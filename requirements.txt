@@ -1,42 +1,35 @@
-# ReconXploit v4.0 ULTIMATE - Python Dependencies
+# ReconXploit v3.0 Professional Edition - Python Dependencies
+# Product of Kernelpanic under infosbios.tech
 
-# Core dependencies
-colorama>=0.4.6
-pyyaml>=6.0.1
-requests>=2.31.0
-aiohttp>=3.8.5
-beautifulsoup4>=4.12.2
-lxml>=4.9.3
-dnspython>=2.4.2
+# Core dependencies for reconnaissance
+colorama>=0.4.6           # Terminal color output
+pyyaml>=6.0.1             # YAML configuration parsing
+requests>=2.31.0          # HTTP client library
+aiohttp>=3.8.5           # Async HTTP client/server
+beautifulsoup4>=4.12.2    # HTML/XML parsing
+lxml>=4.9.3              # Fast XML/HTML processing
+dnspython>=2.4.2         # DNS toolkit
 
-# CLI and interface
-click>=8.1.7
-jinja2>=3.1.2
-rich>=13.0.0
-tabulate>=0.9.0
+# CLI and User Interface
+click>=8.1.7             # Command line interface creation
+jinja2>=3.1.2            # Template engine for reports
+rich>=13.0.0             # Rich text and beautiful formatting
+tabulate>=0.9.0          # Pretty-print tabular data
 
-# Date and time handling
-python-dateutil>=2.8.2
+# Date and time handling  
+python-dateutil>=2.8.2   # Extensions to datetime module
 
-# HTTP and networking  
-urllib3>=1.26.16
-httpx>=0.24.1
-aiofiles>=23.2.1
-asyncio-throttle>=1.0.2
+# HTTP and networking libraries
+urllib3>=1.26.16         # HTTP library with thread-safe connection pooling
+httpx>=0.24.1            # Next-generation HTTP client
+aiofiles>=23.2.1         # Async file I/O
+asyncio-throttle>=1.0.2  # Rate limiting for async operations
 
 # Data processing and analysis
-pandas>=2.0.3
-numpy>=1.24.4
-psutil>=5.9.0
+pandas>=2.0.3            # Data manipulation and analysis
+numpy>=1.24.4            # Numerical computing
+psutil>=5.9.0            # System and process monitoring
 
-# Vulnerability scanning tools (Python packages)
-arjun>=2.1.5
-sublist3r>=1.1
-dirsearch>=0.4.3
-wfuzz>=3.1.0
-
-# Additional utilities
-tldextract>=3.4.4
-python-whois>=0.8.0
-shodan>=1.28.0
-virustotal-api>=1.1.11
+# Optional but recommended
+selenium>=4.11.2         # Web browser automation (optional)
+pillow>=10.0.0           # Image processing (for screenshots)

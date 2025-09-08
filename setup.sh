@@ -1,5 +1,5 @@
 #!/bin/bash
-# ReconXploit v4.0 ULTIMATE - Complete Setup Script
+# ReconXploit v3.0 Professional Edition - Enhanced Setup Script
 
 # Colors
 RED='\033[0;31m'
@@ -7,30 +7,31 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
 NC='\033[0m'
 
 echo -e "${CYAN}"
 cat << "EOF"
-██╗   ██╗██╗  ████████╗██╗███╗   ███╗ █████╗ ████████╗███████╗    ███████╗███████╗████████╗██╗   ██╗██████╗ 
-██║   ██║██║  ╚══██╔══╝██║████╗ ████║██╔══██╗╚══██╔══╝╚══════╝    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-██║   ██║██║     ██║   ██║██╔████╔██║███████║   ██║               ███████╗█████╗     ██║   ██║   ██║██████╔╝
-██║   ██║██║     ██║   ██║██║╚██╔╝██║██╔══██║   ██║               ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝ 
-╚██████╔╝███████╗██║   ██║██║ ╚═╝ ██║██║  ██║   ██║               ███████║███████╗   ██║   ╚██████╔╝██║     
- ╚═════╝ ╚══════╝╚═╝   ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝               ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝     
+██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗██████╗ ██╗      ██████╗ ██╗████████╗
+██╔══██╗██╔════╝██╔════╝██╔═══██╗████╗  ██║╚██╗██╔╝██╔══██╗██║     ██╔═══██╗██║╚══██╔══╝
+██████╔╝█████╗  ██║     ██║   ██║██╔██╗ ██║ ╚███╔╝ ██████╔╝██║     ██║   ██║██║   ██║   
+██╔══██╗██╔══╝  ██║     ██║   ██║██║╚██╗██║ ██╔██╗ ██╔═══╝ ██║     ██║   ██║██║   ██║   
+██║  ██║███████╗╚██████╗╚██████╔╝██║ ╚████║██╔╝ ██╗██║     ███████╗╚██████╔╝██║   ██║   
+╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   
 EOF
 echo -e "${NC}"
 
-echo -e "${CYAN}ReconXploit v4.0 ULTIMATE Enterprise Edition - Complete Setup${NC}"
+echo -e "${CYAN}ReconXploit v3.0 Professional Edition - Enhanced Setup${NC}"
 echo -e "${GREEN}Product of Kernelpanic under infosbios.tech${NC}"
 echo -e "${BLUE}Author: cyb3r-ssrf (Muhammad Ismaeel Shareef S S)${NC}"
 echo ""
 
-# Check if running as root
+# Determine installation type
 if [[ $EUID -eq 0 ]]; then
-   echo -e "${RED}[ERROR]${NC} This script should not be run as root for security reasons"
-   echo -e "${YELLOW}[SOLUTION]${NC} Run as regular user. sudo will be used when needed."
-   exit 1
+    echo -e "${YELLOW}[ROOT DETECTED]${NC} Setting up for global installation..."
+    GLOBAL_INSTALL=true
+else
+    echo -e "${BLUE}[USER MODE]${NC} Setting up for local installation..."
+    GLOBAL_INSTALL=false
 fi
 
 echo -e "${BLUE}[INFO]${NC} ReconXploit installation directory: $(pwd)"
@@ -41,20 +42,49 @@ echo -e "${BLUE}[INFO]${NC} Checking system requirements..."
 # Check OS
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo -e "${GREEN}[SUCCESS]${NC} OS: Linux detected"
+    # Detect distribution
+    if command -v apt &> /dev/null; then
+        PKG_MANAGER="apt"
+        echo -e "${GREEN}[SUCCESS]${NC} Package Manager: APT (Debian/Ubuntu)"
+    elif command -v yum &> /dev/null; then
+        PKG_MANAGER="yum"
+        echo -e "${GREEN}[SUCCESS]${NC} Package Manager: YUM (RHEL/CentOS)"
+    elif command -v dnf &> /dev/null; then
+        PKG_MANAGER="dnf"
+        echo -e "${GREEN}[SUCCESS]${NC} Package Manager: DNF (Fedora)"
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Unknown package manager. Manual tool installation may be required."
+        PKG_MANAGER="manual"
+    fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo -e "${GREEN}[SUCCESS]${NC} OS: macOS detected"
-    echo -e "${YELLOW}[WARNING]${NC} Some tools may require manual installation on macOS"
+    echo -e "${YELLOW}[WARNING]${NC} Some tools may require Homebrew or manual installation"
+    PKG_MANAGER="brew"
 else
     echo -e "${YELLOW}[WARNING]${NC} OS: Unknown system type. Proceeding with caution."
+    PKG_MANAGER="manual"
 fi
 
 # Check Python
 if command -v python3 &> /dev/null; then
     PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
     echo -e "${GREEN}[SUCCESS]${NC} Python: $PYTHON_VERSION"
+
+    # Check Python version (require 3.8+)
+    PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d. -f1)
+    PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
+
+    if [[ $PYTHON_MAJOR -eq 3 && $PYTHON_MINOR -ge 8 ]]; then
+        echo -e "${GREEN}[SUCCESS]${NC} Python version is compatible (3.8+)"
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Python 3.8+ recommended. Current: $PYTHON_VERSION"
+    fi
 else
     echo -e "${RED}[ERROR]${NC} Python 3 is required but not found"
-    echo -e "${YELLOW}[SOLUTION]${NC} Install Python 3: sudo apt install python3 python3-pip python3-venv"
+    echo -e "${YELLOW}[SOLUTION]${NC} Install Python 3:"
+    if [[ $PKG_MANAGER == "apt" ]]; then
+        echo -e "${CYAN}  sudo apt update && sudo apt install -y python3 python3-pip python3-venv${NC}"
+    fi
     exit 1
 fi
 
@@ -72,158 +102,226 @@ if command -v git &> /dev/null; then
     echo -e "${GREEN}[SUCCESS]${NC} Git: Available"
 else
     echo -e "${YELLOW}[WARNING]${NC} Git not found. Installing..."
-    sudo apt update && sudo apt install -y git
+    if [[ $PKG_MANAGER == "apt" ]]; then
+        sudo apt update &>/dev/null && sudo apt install -y git &>/dev/null
+        if command -v git &> /dev/null; then
+            echo -e "${GREEN}[SUCCESS]${NC} Git: Installed"
+        fi
+    fi
 fi
 
 # Check Go
 if command -v go &> /dev/null; then
     GO_VERSION=$(go version | cut -d' ' -f3)
     echo -e "${GREEN}[SUCCESS]${NC} Go: $GO_VERSION"
-else
-    echo -e "${YELLOW}[WARNING]${NC} Go not found. Many tools require Go."
-    echo -e "${CYAN}[INFO]${NC} Install Go from: https://golang.org/dl/"
-fi
 
-# Check Rust/Cargo
-if command -v cargo &> /dev/null; then
-    RUST_VERSION=$(rustc --version | cut -d' ' -f2)
-    echo -e "${GREEN}[SUCCESS]${NC} Rust: $RUST_VERSION"
+    # Setup Go environment
+    if [[ -z "$GOPATH" ]]; then
+        export GOPATH="$HOME/go"
+        export PATH="$PATH:$GOPATH/bin"
+
+        # Add to bashrc/zshrc for persistence
+        if [[ -f "$HOME/.bashrc" ]]; then
+            if ! grep -q "export GOPATH" "$HOME/.bashrc"; then
+                echo 'export GOPATH="$HOME/go"' >> "$HOME/.bashrc"
+                echo 'export PATH="$PATH:$GOPATH/bin"' >> "$HOME/.bashrc"
+            fi
+        fi
+    fi
 else
-    echo -e "${YELLOW}[WARNING]${NC} Rust/Cargo not found. Some tools require Rust."
-    echo -e "${CYAN}[INFO]${NC} Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+    echo -e "${YELLOW}[WARNING]${NC} Go not found. Many reconnaissance tools require Go."
+    echo -e "${CYAN}[INFO]${NC} Install Go from: https://golang.org/dl/"
+    echo -e "${CYAN}[INFO]${NC} Or use: wget -qO- https://git.io/vQhTU | bash"
 fi
 
 echo ""
 echo -e "${BLUE}[INFO]${NC} Creating directory structure..."
 
-# Create directories
-mkdir -p {config,logs,results,wordlists,temp,tools}
-mkdir -p tools/{subdomain,network,vulnerability,content,parameter,osint}
+# Create directories with proper permissions
+mkdir -p {config,logs,results,wordlists,temp,tools} 2>/dev/null
+
+# Set permissions based on installation type
+if [[ $GLOBAL_INSTALL == true ]]; then
+    chmod -R 755 . 2>/dev/null
+    chown -R root:root . 2>/dev/null
+fi
 
 echo -e "${GREEN}[SUCCESS]${NC} Directory structure created"
 
 echo ""
 echo -e "${BLUE}[INFO]${NC} Setting up Python virtual environment..."
 
+# Remove existing venv if corrupted
+if [[ -d "venv" && ! -f "venv/bin/activate" ]]; then
+    echo -e "${YELLOW}[WARNING]${NC} Removing corrupted virtual environment..."
+    rm -rf venv
+fi
+
 # Create virtual environment
-python3 -m venv venv
-if [[ $? -ne 0 ]]; then
-    echo -e "${RED}[ERROR]${NC} Failed to create virtual environment"
-    exit 1
+if [[ ! -d "venv" ]]; then
+    python3 -m venv venv
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}[ERROR]${NC} Failed to create virtual environment"
+        exit 1
+    fi
+    echo -e "${GREEN}[SUCCESS]${NC} Virtual environment created"
+else
+    echo -e "${GREEN}[SUCCESS]${NC} Virtual environment already exists"
 fi
 
 # Activate virtual environment
 source venv/bin/activate
-
-echo -e "${GREEN}[SUCCESS]${NC} Virtual environment created"
+if [[ $? -ne 0 ]]; then
+    echo -e "${RED}[ERROR]${NC} Failed to activate virtual environment"
+    exit 1
+fi
 
 echo ""
 echo -e "${BLUE}[INFO]${NC} Installing Python dependencies..."
 
-# Upgrade pip
-pip install --upgrade pip
+# Upgrade pip first
+python -m pip install --upgrade pip --quiet
 
-# Install dependencies with error handling
-pip install colorama pyyaml requests aiohttp beautifulsoup4 lxml dnspython click jinja2 python-dateutil urllib3 httpx asyncio-throttle aiofiles
+# Install core dependencies
+echo -e "${CYAN}[DEPS]${NC} Installing core reconnaissance dependencies..."
+pip install --quiet colorama pyyaml requests aiohttp beautifulsoup4 lxml dnspython click jinja2 python-dateutil urllib3 httpx asyncio-throttle aiofiles
+
 if [[ $? -ne 0 ]]; then
-    echo -e "${YELLOW}[WARNING]${NC} Some Python packages failed to install"
+    echo -e "${YELLOW}[WARNING]${NC} Some core packages failed to install"
     echo -e "${CYAN}[INFO]${NC} Continuing with available packages..."
 fi
 
-# Install additional packages
-pip install pandas numpy psutil rich tabulate
+# Install analysis dependencies
+echo -e "${CYAN}[DEPS]${NC} Installing data analysis dependencies..."
+pip install --quiet pandas numpy psutil rich tabulate
 
 echo -e "${GREEN}[SUCCESS]${NC} Python dependencies installed"
 
 echo ""
-echo -e "${BLUE}[INFO]${NC} Setting permissions..."
+echo -e "${BLUE}[INFO]${NC} Setting permissions and creating configuration..."
 
 # Set executable permissions
-chmod +x reconxploit
-chmod +x setup.sh
+chmod +x reconxploit 2>/dev/null || true
+chmod +x setup.sh 2>/dev/null || true
 
-echo -e "${GREEN}[SUCCESS]${NC} Permissions set"
-
-echo ""
-echo -e "${BLUE}[INFO]${NC} Creating configuration files..."
-
-# Create basic config file
-cat > config/ultimate_config.yaml << EOF
-# ReconXploit v4.0 ULTIMATE Configuration
+# Create configuration file if it doesn't exist
+if [[ ! -f "config/config.yaml" ]]; then
+    cat > config/config.yaml << EOF
+# ReconXploit v3.0 Professional Configuration
 framework:
-  version: "4.0.0"
-  edition: "Ultimate Enterprise"
+  version: "3.0.0"
+  edition: "Professional Edition"
   author: "cyb3r-ssrf"
 
 performance:
-  threads: 100
-  timeout: 60
+  threads: 50
+  timeout: 30
   delay: 0
-  rate_limit: 1000
-
-ultimate_mode:
-  enabled: true
-  all_tools: true
-  intelligent_chaining: true
-  zero_false_negatives: true
-
-api_integrations:
-  shodan:
-    enabled: false
-    api_key: ""
-  virustotal:
-    enabled: false
-    api_key: ""
-  securitytrails:
-    enabled: false
-    api_key: ""
+  rate_limit: 100
 
 tools:
   subdomain_enumeration:
     enabled: true
-    tools: ["subfinder", "assetfinder", "amass", "sublist3r"]
+    tools: ["subfinder", "assetfinder", "amass"]
   vulnerability_scanning:
     enabled: true
-    tools: ["nuclei", "nikto", "dalfox"]
+    tools: ["nuclei", "nikto"]
+
+output:
+  formats: ["html", "json", "csv"]
+  directory: "results"
+  include_timestamp: true
+
+reporting:
+  detailed_analysis: true
+  risk_assessment: true
+  recommendations: true
 EOF
-
-echo -e "${GREEN}[SUCCESS]${NC} Configuration files created"
-
-echo ""
-echo -e "${CYAN}[ULTIMATE SETUP]${NC} Installing critical reconnaissance tools..."
-
-# Install system tools
-echo -e "${BLUE}[INFO]${NC} Installing system packages..."
-sudo apt update &>/dev/null
-sudo apt install -y nmap masscan gobuster dirb nikto sqlmap curl wget jq libpcap-dev &>/dev/null
+    echo -e "${GREEN}[SUCCESS]${NC} Configuration file created"
+fi
 
 # Create __init__.py files for Python packages
-touch core/__init__.py
-touch tools/__init__.py
-touch tools/subdomain/__init__.py
-touch tools/network/__init__.py
-touch tools/vulnerability/__init__.py
-touch tools/content/__init__.py
-touch tools/parameter/__init__.py
-touch tools/osint/__init__.py
+touch core/__init__.py 2>/dev/null || true
+
+echo -e "${GREEN}[SUCCESS]${NC} Permissions and configuration set"
 
 echo ""
-echo -e "${GREEN}✅ ULTIMATE SETUP COMPLETED SUCCESSFULLY!${NC}"
+echo -e "${CYAN}[TOOLS]${NC} Installing essential reconnaissance tools..."
+
+# Install system tools
+if [[ $PKG_MANAGER == "apt" ]]; then
+    echo -e "${BLUE}[INFO]${NC} Installing system packages via APT..."
+    sudo apt update &>/dev/null
+    sudo apt install -y nmap masscan gobuster dirb nikto curl wget jq dnsutils &>/dev/null
+
+    if [[ $? -eq 0 ]]; then
+        echo -e "${GREEN}[SUCCESS]${NC} System tools installed via APT"
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Some system tools installation failed"
+    fi
+fi
+
+# Create starter wordlists directory
+if [[ ! -f "wordlists/common.txt" ]]; then
+    mkdir -p wordlists
+    cat > wordlists/common.txt << EOF
+admin
+api
+dev
+test
+staging
+www
+mail
+ftp
+blog
+shop
+store
+portal
+dashboard
+panel
+login
+secure
+private
+internal
+EOF
+    echo -e "${GREEN}[SUCCESS]${NC} Basic wordlists created"
+fi
+
+echo ""
+echo -e "${GREEN}✅ RECONXPLOIT v3.0 PROFESSIONAL SETUP COMPLETED!${NC}"
 echo ""
 
 echo -e "${CYAN}🎯 NEXT STEPS:${NC}"
 echo -e "${BLUE}1.${NC} Test installation: ${YELLOW}./reconxploit --check-tools${NC}"
-echo -e "${BLUE}2.${NC} Install Go tools: ${YELLOW}go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest${NC}"
-echo -e "${BLUE}3.${NC} Run first scan: ${YELLOW}./reconxploit -d example.com --ultimate${NC}"
+
+if command -v go &> /dev/null; then
+    echo -e "${BLUE}2.${NC} Install Go tools (recommended):"
+    echo -e "${CYAN}   go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest${NC}"
+    echo -e "${CYAN}   go install github.com/projectdiscovery/httpx/cmd/httpx@latest${NC}"
+    echo -e "${CYAN}   go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest${NC}"
+else
+    echo -e "${BLUE}2.${NC} Install Go first: ${YELLOW}https://golang.org/dl/${NC}"
+fi
+
+echo -e "${BLUE}3.${NC} Run first scan: ${YELLOW}./reconxploit -d infosbios.tech${NC}"
+
+if [[ $GLOBAL_INSTALL == false ]]; then
+    echo -e "${BLUE}4.${NC} Install globally: ${YELLOW}sudo ./reconxploit${NC}"
+fi
+
+echo ""
+echo -e "${CYAN}🔥 PROFESSIONAL FEATURES READY:${NC}"
+echo -e "${GREEN}✅${NC} Advanced Subdomain Enumeration with Risk Analysis"
+echo -e "${GREEN}✅${NC} Live Host Detection with Security Assessment"
+echo -e "${GREEN}✅${NC} Professional Port Scanning and Service Analysis"
+echo -e "${GREEN}✅${NC} Vulnerability Assessment with Threat Intelligence"
+echo -e "${GREEN}✅${NC} Beautiful HTML Reports with Target+Timestamp Naming"
+echo -e "${GREEN}✅${NC} Multi-format Export (JSON/CSV) with Professional Analysis"
+echo -e "${GREEN}✅${NC} Global Installation Capability"
 echo ""
 
-echo -e "${CYAN}🔥 ULTIMATE FEATURES READY:${NC}"
-echo -e "${GREEN}✅${NC} 100+ Reconnaissance Tools Integration"
-echo -e "${GREEN}✅${NC} Intelligent Tool Chaining"
-echo -e "${GREEN}✅${NC} Zero False Negative Algorithms"
-echo -e "${GREEN}✅${NC} Advanced Vulnerability Analysis"
-echo -e "${GREEN}✅${NC} Enterprise-grade Reporting"
-echo ""
+echo -e "${CYAN}🚀 ReconXploit v3.0 Professional Edition is ready!${NC}"
+echo -e "${YELLOW}💎 "Control is an illusion, but reconnaissance is power."${NC}"
 
-echo -e "${MAGENTA}🚀 ReconXploit v4.0 ULTIMATE is ready to revolutionize your reconnaissance!${NC}"
-echo -e "${YELLOW}💎 "In reconnaissance we trust, in automation we excel."${NC}"
+# Deactivate virtual environment
+deactivate 2>/dev/null || true

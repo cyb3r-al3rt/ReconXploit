@@ -1,1 +1,1 @@
-# Subdomain enumeration tools
+"""Subdomain enumeration tools"""

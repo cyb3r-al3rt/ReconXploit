@@ -1,9 +1,3 @@
-"""
-ReconXploit v3.0 - Core Module
-Product of Kernelpanic under infosbios.tech
-"""
-
-__version__ = "3.0.0"
-__author__ = "cyb3r-ssrf"
-__organization__ = "Kernelpanic"
-__website__ = "infosbios.tech"
+"""ReconXploit v4.0 ULTIMATE - Core Package"""
+__version__ = "4.0.0"
+__edition__ = "Ultimate Enterprise"

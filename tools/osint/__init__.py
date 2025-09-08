@@ -1,1 +1,1 @@
-# OSINT tools
+"""OSINT gathering tools"""

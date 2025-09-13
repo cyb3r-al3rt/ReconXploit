@@ -1,1 +1,0 @@
-#!/usr/bin/env python3\n"""ReconXploit Setup Script"""\nprint("Run: sudo bash install_global.sh")

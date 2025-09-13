@@ -1,0 +1,6 @@
+name: "Penetration Testing"
+description: "Professional pentest methodology"
+phases:
+  - reconnaissance
+  - scanning
+  - exploitation

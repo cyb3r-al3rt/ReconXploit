@@ -1,0 +1,6 @@
+name: "Bug Bounty Hunting"
+description: "Complete workflow for bug bounty hunters"
+phases:
+  - information_gathering
+  - subdomain_enumeration
+  - vulnerability_scanning

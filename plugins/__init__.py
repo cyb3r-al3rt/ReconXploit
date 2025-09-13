@@ -1,1 +1,1 @@
-"""ReconXploit Framework Plugins"""\n
+"""ReconXploit Framework Plugins"""

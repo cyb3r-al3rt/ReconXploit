@@ -1,1 +1,1 @@
-"""Custom User Plugins"""\n
+"""Custom User Plugins"""
